@@ -1,0 +1,46 @@
+# Defines our composer file version
+version: "3"
+
+# Define our services 
+services: 
+    nginx:
+        container_name: "nginx"
+        image: nginx:latest
+
+    rabbitmq:
+        container_name: "rabbitmq"
+        tty: true
+        image: rabbitmq:management
+        ports:
+            - 15672:15672
+            - 15671:15671
+            - 5672:5672
+        volumes:
+            - ./rabbitmq/lib:/var/lib/rabbitmq/mnesia
+
+    # This is our nodejs app built using the Dockerfile
+    socket.io:
+        container_name: socket.io
+        # restart: always
+        
+        # Environment file we created
+        env_file:
+            - ./.env
+
+        # use the local Dockerfile
+        build: ./
+
+        # Exposes the necessary ports that our node app uses
+        ports:
+            - "3000:3000"
+        
+        # All the services our node app will link to -
+        # which in our case is only mongo
+        # You can other services such as a Redis
+        links: # depends_on alias name
+            - nginx
+            - rabbitmq # The name should be similar to the service you will build
+
+        depends_on: 
+            - nginx
+            - rabbitmq
