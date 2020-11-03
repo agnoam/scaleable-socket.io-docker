@@ -8,6 +8,7 @@
     "build": "tsc",
     "heroku-postbuild": "webpack",
     "production": "node dist/server.bundle.js",
+    "docker:production": "docker-compose up",
     "prestart": "npm run build",
     "start": "ts-node src/server.ts",
     "dev": "nodemon --inspect src/server.ts",

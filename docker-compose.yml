@@ -3,10 +3,6 @@ version: "3"
 
 # Define our services 
 services: 
-    nginx:
-        container_name: "nginx"
-        image: nginx:latest
-
     rabbitmq:
         container_name: "rabbitmq"
         tty: true
@@ -18,10 +14,9 @@ services:
         volumes:
             - ./rabbitmq/lib:/var/lib/rabbitmq/mnesia
 
-    # This is our nodejs app built using the Dockerfile
-    socket.io:
+    socket-handler:
         container_name: socket.io
-        # restart: always
+        restart: always
         
         # Environment file we created
         env_file:
@@ -35,12 +30,23 @@ services:
             - "3000:3000"
         
         # All the services our node app will link to -
-        # which in our case is only mongo
         # You can other services such as a Redis
-        links: # depends_on alias name
-            - nginx
+        # links: depends_on alias name
+        links:
             - rabbitmq # The name should be similar to the service you will build
 
         depends_on: 
-            - nginx
             - rabbitmq
+
+    nginx:
+        container_name: nginx
+        image: nginx:latest
+        volumes: 
+            - ./nginx:/etc/nginx
+        ports: 
+            - "8000:80"
+
+        links: 
+            - socket-handler
+        depends_on: 
+            - socket-handler
