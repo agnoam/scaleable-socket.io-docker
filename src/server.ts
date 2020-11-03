@@ -6,9 +6,15 @@ import os from "os";
 import { ServerMiddleware } from "./middlewares/server.middleware";
 import { RoutesConfig } from "./config/routes.config";
 // import { DBDriver } from "./config/mongo.config";
+// import { initializeFirebase } from './config/firebase.config';
 import http, { Server } from "http";
 import socketIO from "socket.io";
-// import { initializeFirebase } from './config/firebase.config';
+import amqpAdapter from 'socket.io-amqp';
+import { SocketEventsHandler } from './components/socket.ctrl';
+
+// Loading .env file
+import dotenv from 'dotenv';
+dotenv.config();
 
 export class ServerBoot {
   private readonly port: number = +process.env.PORT || 8810;
@@ -33,7 +39,9 @@ export class ServerBoot {
   /* If you don't need socket.io in your project delete this, 
     and don't forget to remove the `socket.io`, `@types/socket.io` dependencies */
   private getSocket(server: Server): socketIO.Server {
-    return socketIO.listen(server);
+    return socketIO.listen(server, {
+      adapter: amqpAdapter(process.env.RABBIT_MQ_URI)
+    });
   }
 
   private listen(): void {
@@ -53,6 +61,7 @@ export class ServerBoot {
     // initializeFirebase();
 
     RoutesConfig(this.app);
+    SocketEventsHandler(this.io);
   }
 
   private loadMiddlewares(): void {
