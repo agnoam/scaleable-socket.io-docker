@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: socket-handler
+  labels:
+    app: socket-handler
+
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: socket-handler
+  
+  # Pod defenition
+  template:
+    metadata:
+      labels:
+        app: socket-handler
+
+    spec: 
+      containers:
+        - name: socket-handler
+          image: socket-handler
+          imagePullPolicy: Never # Remove this in production (local-image pull)
+          
+          # Example of 'in-deployment' env declaration
+          env:
+            - name: RABBIT_MQ_URI
+              value: amqp://admin:admin@rabbitmq-service:5672 # URL is the name of the wanted service
+
+          ports:
+            - containerPort: 3000 # Port to expose inside the container
+
+# Yaml file seperator
+--- 
+
+# External service of socket-handler deployment
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: socket-handler-service
+
+spec:
+  selector:
+    app: socket-handler
+
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+
+  type: LoadBalancer

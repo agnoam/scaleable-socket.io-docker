@@ -1,5 +1,6 @@
 import { Application, Request, Response } from "express";
 import { userRouter } from '../components/user/user.routes';
+import os from 'os';
 
 console.log("import routes.config");
 
@@ -9,6 +10,6 @@ export const RoutesConfig = (app: Application) => {
         .use('/users', userRouter)
 
         .get('/', (req: Request, res: Response) => {
-            res.send('node-ts server is running ;)');
+            res.send(`node-ts server is running ;) ${os.hostname()}`);
         });
 }

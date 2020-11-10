@@ -20,6 +20,6 @@ RUN rm -rf README.md CHANGELOG.md app.json .gitignore
 
 RUN yarn --production
 
-EXPOSE 3000
+# EXPOSE 3000
 
 CMD ["node", "./dist/server.js"]
