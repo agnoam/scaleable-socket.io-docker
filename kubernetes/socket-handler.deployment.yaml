@@ -26,8 +26,11 @@ spec:
           
           # Example of 'in-deployment' env declaration
           env:
-            - name: RABBIT_MQ_URI
-              value: amqp://admin:admin@rabbitmq-service:5672 # URL is the name of the wanted service
+            - name: REDIS_HOST
+              value: "redis-service" # Host is the name of the wanted service
+
+            - name: REDIS_PORT
+              value: '6379'
 
           ports:
             - containerPort: 3000 # Port to expose inside the container

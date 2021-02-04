@@ -9,7 +9,7 @@ import { RoutesConfig } from "./config/routes.config";
 // import { initializeFirebase } from './config/firebase.config';
 import http, { Server } from "http";
 import socketIO from "socket.io";
-import amqpAdapter from 'socket.io-amqp';
+import redisAdapter from 'socket.io-redis';
 import { SocketEventsHandler } from './components/socket.ctrl';
 
 // Loading .env file
@@ -40,7 +40,7 @@ export class ServerBoot {
     and don't forget to remove the `socket.io`, `@types/socket.io` dependencies */
   private getSocket(server: Server): socketIO.Server {
     return socketIO.listen(server, {
-      adapter: amqpAdapter(process.env.RABBIT_MQ_URI)
+      adapter: redisAdapter({ host: process.env.REDIS_HOST, port: +process.env.REDIS_PORT })
     });
   }
 
