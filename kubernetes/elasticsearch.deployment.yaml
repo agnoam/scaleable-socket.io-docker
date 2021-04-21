@@ -16,10 +16,19 @@ spec:
         app: elasticsearch
 
     spec:
+      volumes:
+        - name: elasticsearch-storage
+          persistentVolumeClaim:
+            claimName: elasticsearch-volume-claim
+      
+      securityContext: {}
       containers:
         - name: elasticsearch
           image: docker.elastic.co/elasticsearch/elasticsearch:7.11.2
           
+          securityContext:
+            privileged: true
+
           env:
             - name: xpack.security.enabled
               value: 'false'
@@ -29,6 +38,10 @@ spec:
           ports:
             - containerPort: 9200
             - containerPort: 9300
+
+          volumeMounts:
+            - mountPath: /usr/share/elasticsearch/data
+              name: elasticsearch-storage
 
 ---
 
