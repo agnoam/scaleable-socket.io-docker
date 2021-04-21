@@ -1,8 +1,8 @@
 echo Removing all project's data
 
-kubectl delete deployment socket-handler rabbitmq
-kubectl delete service socket-handler-service rabbitmq-service
-kubectl delete secret rabbitmq-secrets
-kubectl delete configmap rabbitmq-config
+kubectl delete deployment socket-handler redis kibana elasticsearch
+kubectl delete service socket-handler-service redis-service kibana-service elasticsearch-service
+@REM kubectl delete secret rabbitmq-secrets
+kubectl delete configmap kibana-configmap
 
 echo All data removed
