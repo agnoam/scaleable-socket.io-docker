@@ -9,19 +9,18 @@ spec:
     matchLabels:
       app: elasticsearch
 
-  # Pod defenition
   template:
     metadata:
       labels:
         app: elasticsearch
 
     spec:
-      volumes:
-        - name: elasticsearch-storage
-          persistentVolumeClaim:
-            claimName: elasticsearch-volume-claim
+      # volumes:
+      #   - name: elasticsearch-storage
+      #     persistentVolumeClaim:
+      #       claimName: elasticsearch-volume-claim
       
-      securityContext: {}
+      # securityContext: {}
       containers:
         - name: elasticsearch
           image: docker.elastic.co/elasticsearch/elasticsearch:7.11.2
@@ -39,9 +38,9 @@ spec:
             - containerPort: 9200
             - containerPort: 9300
 
-          volumeMounts:
-            - mountPath: /usr/share/elasticsearch/data
-              name: elasticsearch-storage
+          # volumeMounts:
+          #   - mountPath: /usr/share/elasticsearch/data
+          #     name: elasticsearch-storage
 
 ---
 
@@ -60,10 +59,12 @@ spec:
       name: rest
       port: 9200
       targetPort: 9200
+      nodePort: 30000
 
     - protocol: TCP
       name: inter-node
       port: 9300
       targetPort: 9300
+      nodePort: 30001
 
-  type: LoadBalancer
+  type: NodePort

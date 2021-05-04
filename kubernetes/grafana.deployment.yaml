@@ -1,0 +1,58 @@
+# apiVersion: apps/v1
+# kind: Deployment
+
+# metadata:
+#   name: grafana
+
+# spec:
+#   selector:
+#     matchLabels:
+#       app: grafana
+
+#   # Pod defenition
+#   template:
+#     metadata:
+#       labels:
+#         app: grafana
+
+#     spec:
+#       containers:
+#         - name: grafana
+#           image: grafana/grafana
+          
+#           env:
+#             - name: ELASTICSEARCH_HOSTS # Env var name
+#               valueFrom:
+#                 configMapKeyRef:
+#                   name: kibana-configmap # Name of ConfigMap
+#                   key: elasticsearch-hosts # Name of key in ConfigMap 
+
+#             - name: XPACK_SECURITY_ENABLED
+#               valueFrom:
+#                 configMapKeyRef:
+#                   name: kibana-configmap
+#                   key: security-enabled
+            
+#           ports:
+#             - containerPort: 3000
+
+# # Yaml file seperator
+# --- 
+
+# # External service of redis deployment
+# apiVersion: v1
+# kind: Service
+
+# metadata:
+#   name: grafana-service
+
+# spec:
+#   selector:
+#     app: redis
+  
+#   ports:
+#     - protocol: TCP
+#       port: 3000
+#       targetPort: 3000
+
+#   type: NodePort

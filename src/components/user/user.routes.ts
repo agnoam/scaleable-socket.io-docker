@@ -10,4 +10,5 @@ export const userRouter: Router = Router();
 userRouter
   .post('/login', UserCtrl.login_R)
   .post('/sign-up', UserCtrl.signUp_R)
-  .post('/post', UserCtrl.doPost_R);
+  .post('/post', UserCtrl.doPost_R)
+  .post('/send-message', UserCtrl.sendMessage_R);

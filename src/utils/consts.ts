@@ -11,6 +11,7 @@ export enum ResponseStatus {
     Found = 302
 }
 
-export enum CollectionsNames {
-    Users = 'users'
+export enum ElasticSearchIndexes {
+    Users = 'users',
+    Messages = 'messages'
 }

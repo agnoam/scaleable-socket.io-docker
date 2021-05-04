@@ -1,76 +1,76 @@
 
-/************* Moduls **************/
 import bodyParser from "body-parser";
 import express, { Application } from "express";
 import os from "os";
 import { ServerMiddleware } from "./middlewares/server.middleware";
 import { RoutesConfig } from "./config/routes.config";
-// import { DBDriver } from "./config/mongo.config";
-// import { initializeFirebase } from './config/firebase.config';
-import http, { Server } from "http";
-import socketIO from "socket.io";
-import redisAdapter from 'socket.io-redis';
+import http from "http";
+import * as SocketIO from "socket.io";
+import { createAdapter } from 'socket.io-redis';
 import { SocketEventsHandler } from './components/socket.ctrl';
+// import { ElasticService } from "./config/elasticsearch.config";
+import { RedisClient } from "redis";
+import cors from 'cors';
+import { SocketMiddleare } from "./middlewares/socket.middleware";
 
 // Loading .env file
 import dotenv from 'dotenv';
 dotenv.config();
 
-export class ServerBoot {
-  private readonly port: number = +process.env.PORT || 8810;
-  private app: Application;
-  public server: Server;
-  public io: SocketIO.Server;
+export module ServerRoot {
+  const port: number = +process.env.PORT || 8810;
+  export const app: Application = express();
+  const server: http.Server = createServer();
+  const publishRedisClient: RedisClient = new RedisClient({ host: process.env.REDIS_HOST, port: +process.env.REDIS_PORT });
+  const subscribeRedisClient: RedisClient = publishRedisClient.duplicate();
 
-  constructor() {
-    this.app = express();
-    this.server = this.createServer();
+  export const io: SocketIO.Server = getSocket(server);
+  // export const elasticService: ElasticService = new ElasticService();
 
-    // Remove this if you does not want socket.io in your project
-    this.io = this.getSocket(this.server); 
-
-    this.listen();
+  function createServer(): http.Server {
+    return http.createServer(app);
   }
 
-  private createServer(): Server {
-    return http.createServer(this.app);
+  function getSocket(server: http.Server): SocketIO.Server {
+    try {
+      return new SocketIO.Server(server, { 
+        transports: ['websocket', 'polling'],
+        adapter: createAdapter({ 
+          pubClient: publishRedisClient, subClient: subscribeRedisClient 
+        }) 
+      });
+    } catch(ex) {
+      console.error('Socket.IO exception:', ex);
+    }
   }
 
-  /* If you don't need socket.io in your project delete this, 
-    and don't forget to remove the `socket.io`, `@types/socket.io` dependencies */
-  private getSocket(server: Server): socketIO.Server {
-    return socketIO.listen(server, {
-      adapter: redisAdapter({ host: process.env.REDIS_HOST, port: +process.env.REDIS_PORT })
-    });
-  }
-
-  private listen(): void {
-    this.loadMiddlewares();
-    this.configModules();
+  export const listen = (): void => {
+    loadMiddlewares();
+    configModules();
     
-    const localIP: string = this.findMyIP();
+    const localIP: string = findMyIP();
 
-    this.server.listen(this.port, () => {
-      console.log(`Our app server is running on http://${os.hostname()}:${this.port}`);
-      console.log(`Server running on: http://${localIP}:${this.port}`);
+    server.listen(port, () => {
+      console.log(`Our app server is running on http://${os.hostname()}:${port}`);
+      console.log(`Server running on: http://${localIP}:${port}`);
     });
   }
 
-  private configModules(): void {
-    // DBDriver.connect();
-    // initializeFirebase();
-
-    RoutesConfig(this.app);
-    SocketEventsHandler(this.io);
+  function configModules(): void {
+    RoutesConfig(app);
+    SocketEventsHandler(io);
   }
 
-  private loadMiddlewares(): void {
-    this.app.use( bodyParser.json() );
-    this.app.use( bodyParser.urlencoded({ extended: true }) );
-    this.app.use( ServerMiddleware );
+  function loadMiddlewares(): void {
+    app.use( bodyParser.json() );
+    app.use( bodyParser.urlencoded({ extended: true }) );
+    app.use( cors() );
+    app.use( ServerMiddleware );
+
+    SocketMiddleare(io);
   }
 
-  public findMyIP(): string {
+  function findMyIP(): string {
     // Get the server's local ip
     const ifaces: NetworkInterface = os.networkInterfaces();
     let localIP: string;
@@ -101,4 +101,4 @@ interface NetworkInterface {
 }
 
 // Running the server
-const serverInstance: ServerBoot = new ServerBoot();
+ServerRoot.listen();
